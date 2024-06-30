@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "713208459234",
+    "project_id": "sohba-a81c3",
+    "storage_bucket": "sohba-a81c3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:713208459234:android:c72aeb6aac5e914cd693bb",
+        "android_client_info": {
+          "package_name": "com.osama.sohba"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPINg9UBbxt_eq0dCQ6MAaxG9Q4vTPOmQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
