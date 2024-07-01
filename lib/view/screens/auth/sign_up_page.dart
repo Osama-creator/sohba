@@ -13,20 +13,33 @@ class SignUpPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isLoading = ref.watch(signUpControllerProvider);
     final signUpController = ref.read(signUpControllerProvider.notifier);
+    final profileImage = signUpController.profileImage;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Gap(80.h),
+            Gap(50.h),
             Center(
               child: Text(
                 'إنشاء حساب جديد',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),
-            Gap(150.h),
+            Gap(20.h),
             Column(
               children: [
+                InkWell(
+                  onTap: () async {
+                    await signUpController.pickProfileImage();
+                  },
+                  child: CircleAvatar(
+                    radius: 100,
+                    backgroundImage: profileImage != null ? FileImage(profileImage) : null,
+                    child: profileImage == null ? const Icon(Icons.person, size: 50) : null,
+                  ),
+                ),
+                Gap(50.h),
                 SizedBox(
                   height: 50.h,
                   child: MyTextField(
@@ -56,7 +69,7 @@ class SignUpPage extends ConsumerWidget {
                     obscureText: true,
                   ),
                 ),
-                Gap(150.h),
+                Gap(100.h),
                 Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w),
                     width: double.infinity,
