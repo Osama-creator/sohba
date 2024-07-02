@@ -7,27 +7,13 @@ import 'package:sohba/model/user_model.dart';
 class UserDataService {
   final SharedPreferences _prefs;
   UserDataService(this._prefs);
+
   static const String userDataKey = 'userData';
 
   static Future<void> saveUserDataToLocal(Map<String, dynamic> userData) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(userDataKey, jsonEncode(userData));
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> saveUserDataToPrefs(Map<String, dynamic> userData) async {
-    try {
-      await _prefs.setString(
-        'userData',
-        jsonEncode({
-          'name': userData['name'],
-          'phone': userData['phone'],
-          'avatar': userData['avatar'],
-        }),
-      );
     } catch (e) {
       rethrow;
     }
