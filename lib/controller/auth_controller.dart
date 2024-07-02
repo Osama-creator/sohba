@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sohba/model/user_model.dart';
 import 'package:sohba/service/auth_service.dart';
@@ -17,16 +16,6 @@ class SignUpController extends StateNotifier<bool> {
   TextEditingController phoneC = TextEditingController();
   TextEditingController passwordC = TextEditingController();
   File? profileImage;
-
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> pickProfileImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      profileImage = File(image.path);
-      state = state; // Trigger state update
-    }
-  }
 
   Future<String?> uploadProfileImage(File image) async {
     try {
@@ -80,14 +69,18 @@ class SignUpController extends StateNotifier<bool> {
     if (nameC.text.trim().isEmpty || phoneC.text.trim().isEmpty || passwordC.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى ملء جميع الحقول')));
       return false;
+    } else if (passwordC.text.trim().length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('كلمه السر ضعيفه')));
+      return false;
+      // } else if (phoneC.text[0] != '0' || phoneC.text[1] != '1' || phoneC.text.length != 11) {
+      //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('رقم الهاتف غير صحيح')));
+      //   return false;
     }
     return true;
   }
 
   void _handleFirebaseAuthException(FirebaseAuthException e, BuildContext context) {
-    if (e.code == 'weak-password') {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('كلمه السر ضعيفه')));
-    } else if (e.code == 'email-already-in-use') {
+    if (e.code == 'email-already-in-use') {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('هذا الحساب موجود بالفعل')));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ : ${e.message}')));

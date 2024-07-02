@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+
+import 'package:sohba/config/utils/colors.dart';
 import 'package:sohba/controller/auth_controller.dart';
+import 'package:sohba/view/widgets/profile_image.dart';
 import 'package:sohba/view/widgets/text_field.dart';
 
 class SignUpPage extends ConsumerWidget {
@@ -29,16 +31,11 @@ class SignUpPage extends ConsumerWidget {
             Gap(20.h),
             Column(
               children: [
-                InkWell(
-                  onTap: () async {
-                    await signUpController.pickProfileImage();
-                  },
-                  child: CircleAvatar(
-                    radius: 100,
-                    backgroundImage: profileImage != null ? FileImage(profileImage) : null,
-                    child: profileImage == null ? const Icon(Icons.person, size: 50) : null,
-                  ),
-                ),
+                ProfileImage(
+                    onChanged: (value) {
+                      signUpController.profileImage = value;
+                    },
+                    profileImage: profileImage),
                 Gap(50.h),
                 SizedBox(
                   height: 50.h,
@@ -78,7 +75,12 @@ class SignUpPage extends ConsumerWidget {
                         onPressed: () {
                           signUpController.signUp(context);
                         },
-                        child: isLoading ? const CircularProgressIndicator() : const Text('انشاء حساب')))
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: AppColors.white,
+                                strokeWidth: 3,
+                              )
+                            : const Text('انشاء حساب')))
               ],
             ),
           ],
