@@ -8,6 +8,7 @@ class MyTextField extends StatefulWidget {
   final double width;
   final TextInputType? keyboardType;
   final Function(String)? onFieldSubmitted;
+  final Function(String)? onChanged;
   final bool obscureText;
   final int? maxLength;
   final int maxLines;
@@ -24,6 +25,7 @@ class MyTextField extends StatefulWidget {
     this.width = double.infinity,
     this.obscureText = false,
     this.maxLength,
+    this.onChanged,
     this.maxLines = 1,
     this.validator,
   });
@@ -43,6 +45,7 @@ class _MyTextFieldState extends State<MyTextField> {
         height: widget.maxLines < 1 ? MediaQuery.of(context).size.height * 0.055 : null,
         width: widget.width,
         child: TextFormField(
+          onChanged: widget.onChanged,
           keyboardType: widget.keyboardType ?? TextInputType.text,
           obscureText: isObscured && widget.obscureText,
           controller: widget.controller,

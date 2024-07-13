@@ -52,7 +52,7 @@ class SignUpController extends StateNotifier<bool> {
       state = false;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => const UserSearchPage(),
         ),
       );
     } on FirebaseAuthException catch (e) {
