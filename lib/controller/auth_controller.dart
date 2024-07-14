@@ -4,9 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sohba/model/user_model.dart';
 import 'package:sohba/service/auth_service.dart';
-import 'package:sohba/view/screens/home/home.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'dart:developer';
+
+import 'package:sohba/view/screens/home/main_screen.dart';
 
 class SignUpController extends StateNotifier<bool> {
   final AuthServiceInterface authService;
@@ -52,7 +53,7 @@ class SignUpController extends StateNotifier<bool> {
       state = false;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const UserSearchPage(),
+          builder: (context) => const MainScreen(),
         ),
       );
     } on FirebaseAuthException catch (e) {

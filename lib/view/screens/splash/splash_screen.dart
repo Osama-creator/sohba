@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sohba/helpers/get_it.dart';
 import 'package:sohba/service/local_service.dart';
 import 'package:sohba/view/screens/auth/sign_up_page.dart';
-import 'package:sohba/view/screens/home/home.dart';
+import 'package:sohba/view/screens/home/main_screen.dart';
 
 class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
@@ -24,7 +24,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     if (userData != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const HomePage(),
+          builder: (context) => const MainScreen(),
         ),
       );
     } else {
@@ -42,7 +42,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       body: Center(
         child: Image.asset(
           "assets/images/logo.png",
-          scale: 3,
+          scale: 1,
         ),
       ),
     );
