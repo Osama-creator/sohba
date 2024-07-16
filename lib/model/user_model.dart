@@ -33,27 +33,27 @@ class UserModel {
   int get hashCode => phone.hashCode ^ name.hashCode ^ avatar.hashCode ^ password.hashCode;
 }
 
-class FriendModel extends UserModel {
-  final String id;
+// class FriendModel extends UserModel {
+//   final String id;
 
-  FriendModel({
-    required this.id,
-    super.phone,
-    super.name,
-    super.avatar,
-    super.password,
-  }) : super();
+//   FriendModel({
+//     required this.id,
+//     super.phone,
+//     super.name,
+//     super.avatar,
+//     super.password,
+//   }) : super();
 
-  factory FriendModel.fromJson(Map<String, dynamic> json, String id) {
-    return FriendModel(
-      id: id,
-      phone: json['phone'],
-      name: json['name'],
-      avatar: json['avatar'],
-      password: json['password'],
-    );
-  }
+//   factory FriendModel.fromJson(Map<String, dynamic> json, String id) {
+//     return FriendModel(
+//       id: id,
+//       phone: json['phone'],
+//       name: json['name'],
+//       avatar: json['avatar'],
+//       password: json['password'],
+//     );
+//   }
 
-  @override
-  int get hashCode => id.hashCode ^ super.hashCode;
-}
+//   @override
+//   int get hashCode => id.hashCode ^ super.hashCode;
+// }

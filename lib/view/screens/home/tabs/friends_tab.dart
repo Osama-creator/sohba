@@ -9,20 +9,25 @@ class FriendsTab extends ConsumerStatefulWidget {
   const FriendsTab({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _FriendsTabState createState() => _FriendsTabState();
 }
 
 class _FriendsTabState extends ConsumerState<FriendsTab> {
   @override
+  void initState() {
+    super.initState();
+    ref.read(friendsNotifierProvider.notifier).loadFriends();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final friendsState = ref.watch(friendsNotifierProvider);
+
     return Scaffold(
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: 30.h,
-          ),
+          SizedBox(height: 30.h),
           Center(
             child: Text(
               "الأصدقاء",
@@ -33,28 +38,27 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
                   ),
             ),
           ),
-          ref.watch(getFriendsProvider).when(
-                data: (users) => Expanded(
-                  child: ListView.builder(
-                    itemCount: users.length,
-                    itemBuilder: (context, index) => Column(
-                      children: [
-                        ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: AppColors.black,
-                            backgroundImage: NetworkImage(users[index].avatar ??
-                                'https://www.google.com/imgres?q=profile%20image&imgurl=https%3A%2F%2Fstatic.vecteezy.com%2Fsystem%2Fresources%2Fpreviews%2F005%2F544%2F718%2Fnon_2x%2Fprofile-icon-design-free-vector.jpg&imgrefurl=https%3A%2F%2Fwww.vecteezy.com%2Ffree-vector%2Fprofile-icon&docid=RBpRIqik_jZCqM&tbnid=_5mhIFxchtSFMM&vet=12ahUKEwj3_6bUoaeHAxWkUaQEHbPUAU8QM3oECBwQAA..i&w=980&h=980&hcb=2&ved=2ahUKEwj3_6bUoaeHAxWkUaQEHbPUAU8QM3oECBwQAA'),
-                          ),
-                          title: Text(users[index].name!),
-                        ),
-                        const Divider(),
-                      ],
+          friendsState.when(
+            data: (users) => Expanded(
+              child: ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (context, index) => Column(
+                  children: [
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.black,
+                        backgroundImage: NetworkImage(users[index].avatar),
+                      ),
+                      title: Text(users[index].name),
                     ),
-                  ),
+                    const Divider(),
+                  ],
                 ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Text('Error: $error'),
               ),
+            ),
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Text('Error: $error'),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
@@ -65,7 +69,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
             ),
           );
           if (result == true) {
-            ref.refresh(getFriendsProvider);
+            ref.read(friendsNotifierProvider.notifier).loadFriends(forceRefresh: true);
           }
         },
         backgroundColor: Theme.of(context).primaryColor,
@@ -77,9 +81,7 @@ class _FriendsTabState extends ConsumerState<FriendsTab> {
                     color: AppColors.white,
                   ),
             ),
-            SizedBox(
-              width: 5.w,
-            ),
+            SizedBox(width: 5.w),
             const Icon(Icons.add),
           ],
         ),

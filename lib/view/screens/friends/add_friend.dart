@@ -60,7 +60,7 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
                       child: UserCard(
                         user: users[index],
                         onAddFriend: () {
-                          ref.read(friendsServiceProvider).addFriend(users[index].id);
+                          ref.read(friendsNotifierProvider.notifier).addFriend(users[index].id);
                           Navigator.of(context).pop(true);
                         },
                       ),
