@@ -5,10 +5,6 @@ import 'package:sohba/model/challenge.dart';
 import 'package:sohba/model/task.dart';
 import 'package:sohba/service/challenge_service.dart';
 
-final getChallengesProvider = FutureProvider<List<Challenge>>(
-  (ref) => ref.read(chalengeServiceProvider).getChallenges(),
-);
-
 class ChallengeNotifier extends ChangeNotifier {
   final ChallengService _challengService;
 
@@ -52,6 +48,32 @@ class ChallengeNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> removeChallengeFromAll(
+    String challengeId,
+  ) async {
+    try {
+      await _challengService.removeChallenge(
+        challengeId,
+      );
+      notifyListeners();
+    } catch (e) {
+      log('Error In Removiing challenge: $e');
+    }
+  }
+
+  Future<void> leaveChallenge(
+    String challengeId,
+  ) async {
+    try {
+      await _challengService.leaveChallenge(
+        challengeId,
+      );
+      notifyListeners();
+    } catch (e) {
+      log('Error In leaving challenge: $e');
+    }
+  }
+
   Future<void> checkTask(
     String challengeId,
     String taskId,
@@ -65,6 +87,21 @@ class ChallengeNotifier extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       log('Error checking task in challenge: $e');
+    }
+  }
+
+  Future<void> deleteTask(
+    String challengeId,
+    String taskId,
+  ) async {
+    try {
+      await _challengService.deleteTask(
+        challengeId,
+        taskId,
+      );
+      notifyListeners();
+    } catch (e) {
+      log('Error Date task in challenge: $e');
     }
   }
 

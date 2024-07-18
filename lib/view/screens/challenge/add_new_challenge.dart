@@ -59,7 +59,9 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
   Future<void> _selectFriends(BuildContext context) async {
     final selectedFriends = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const SelectFriendsScreen(),
+        builder: (context) => const SelectFriendsScreen(
+          preSelectedFriendIds: [],
+        ),
       ),
     );
 
@@ -159,7 +161,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
               onPressed: () {
                 setState(() {
                   _tasks.add(Task(
-                    id: DateTime.now().toIso8601String(), // Unique ID for the task
+                    id: DateTime.now().toIso8601String(),
                     name: taskNameController.text,
                     friendsId: [],
                     friendsCountList: [],

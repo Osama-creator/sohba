@@ -4,18 +4,21 @@ import 'package:sohba/config/utils/colors.dart';
 import 'package:sohba/controller/friends_controller.dart';
 
 class SelectFriendsScreen extends ConsumerStatefulWidget {
-  const SelectFriendsScreen({super.key});
+  final List<String> preSelectedFriendIds; // Add this line
+
+  const SelectFriendsScreen({super.key, required this.preSelectedFriendIds}); // Update constructor
 
   @override
   _SelectFriendsScreenState createState() => _SelectFriendsScreenState();
 }
 
 class _SelectFriendsScreenState extends ConsumerState<SelectFriendsScreen> {
-  final Set<String> _selectedFriendIds = {};
+  late Set<String> _selectedFriendIds; // Change to late
 
   @override
   void initState() {
     super.initState();
+    _selectedFriendIds = widget.preSelectedFriendIds.toSet(); // Initialize with preSelectedFriendIds
     ref.read(friendsNotifierProvider.notifier).loadFriends();
   }
 
