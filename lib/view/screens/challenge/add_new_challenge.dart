@@ -27,6 +27,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
       var adminId = FirebaseAuth.instance.currentUser!.uid;
       _selectedFriends.add(adminId);
       final newChallenge = Challenge(
+        dayNumber: 1,
         adminId: adminId,
         id: "",
         name: _challengeName,
@@ -118,7 +119,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
                 onPressed: () async {
                   await _selectFriends(context);
                 },
-                child: const Text('Select Friends'),
+                child: const Text('إضافة صديق'),
               ),
               const SizedBox(height: 16),
               Text('صديق: ${_selectedFriends.length.toString()}'),

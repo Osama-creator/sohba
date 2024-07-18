@@ -5,6 +5,7 @@ import 'package:sohba/config/utils/colors.dart';
 import 'package:sohba/controller/chalenge_controller.dart';
 import 'package:sohba/model/challenge.dart';
 import 'package:sohba/view/screens/challenge/add_new_challenge.dart';
+import 'package:sohba/view/screens/challenge/challenge_page.dart';
 
 class ChalengesTab extends ConsumerWidget {
   const ChalengesTab({super.key});
@@ -84,6 +85,7 @@ class ChalengesTab extends ConsumerWidget {
 
 class ChallengeCard extends StatelessWidget {
   final Challenge challenge;
+
   const ChallengeCard({
     super.key,
     required this.challenge,
@@ -92,27 +94,51 @@ class ChallengeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 100.h,
+      height: 120.h,
       width: 300.w,
-      child: Card(
-        elevation: 10,
-        color: AppColors.primary,
-        child: Column(
-          children: [
-            Text(
-              challenge.name,
-              style:
-                  Theme.of(context).textTheme.bodyMedium!.copyWith(color: AppColors.white, fontWeight: FontWeight.bold),
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ChallengeDetails(challengeId: challenge.id),
             ),
-            Text(
-              challenge.friendsId.length.toString(),
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.white, fontSize: 16.sp),
+          );
+        },
+        child: Card(
+          elevation: 10,
+          color: AppColors.primary,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  challenge.name,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  'الأصدقاء: ${challenge.friendsId.length}',
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: AppColors.white,
+                        fontSize: 16.sp,
+                      ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  'Day ${challenge.dayNumber}',
+                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                        color: AppColors.white,
+                        fontSize: 16.sp,
+                      ),
+                ),
+              ],
             ),
-            Text(
-              ' يوم 40',
-              style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.white, fontSize: 16.sp),
-            )
-          ],
+          ),
         ),
       ),
     );

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +11,11 @@ abstract class ChallengServiceInterface {
   Future<List<Challenge>> getChallenges();
   Future<void> addMemberToChallenge(String challengeId, String memberId);
   Future<void> addTaskToChallenge(String challengeId, Task newTask);
-  Future<void> checkTask(String challengeId, String taskId, String memberId);
+  Future<void> clearTasks(String challengeId);
+  Future<void> toggleTaskCheck(
+    String challengeId,
+    String taskId,
+  );
   Future<void> updateEndDate(String challengeId, DateTime endDate);
 }
 
@@ -47,7 +53,12 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> checkTask(String challengeId, String taskId, String memberId) async {
+  Future<void> toggleTaskCheck(
+    String challengeId,
+    String taskId,
+  ) async {
+    String memberId = FirebaseAuth.instance.currentUser?.uid ?? '';
+
     DocumentSnapshot challengeSnapshot = await _firestore.collection(_collectionName).doc(challengeId).get();
     if (!challengeSnapshot.exists) {
       throw Exception('Challenge with ID $challengeId does not exist.');
@@ -60,15 +71,28 @@ class ChallengService implements ChallengServiceInterface {
     if (taskIndex != -1) {
       Task updatedTask = tasks[taskIndex];
 
-      if (!updatedTask.friendsId.contains(memberId)) {
-        updatedTask.friendsId.add(memberId);
-      }
+      if (updatedTask.friendsId.contains(memberId)) {
+        // Uncheck task
+        updatedTask.friendsId.remove(memberId);
 
-      int friendIndex = updatedTask.friendsCountList.indexWhere((item) => item.id == memberId);
-      if (friendIndex != -1) {
-        updatedTask.friendsCountList[friendIndex].count++;
+        int friendIndex = updatedTask.friendsCountList.indexWhere((item) => item.id == memberId);
+        if (friendIndex != -1) {
+          if (updatedTask.friendsCountList[friendIndex].count > 1) {
+            updatedTask.friendsCountList[friendIndex].count--;
+          } else {
+            updatedTask.friendsCountList.removeAt(friendIndex);
+          }
+        }
       } else {
-        updatedTask.friendsCountList.add(FriendsCount(id: memberId, count: 1));
+        // Check task
+        updatedTask.friendsId.add(memberId);
+
+        int friendIndex = updatedTask.friendsCountList.indexWhere((item) => item.id == memberId);
+        if (friendIndex != -1) {
+          updatedTask.friendsCountList[friendIndex].count++;
+        } else {
+          updatedTask.friendsCountList.add(FriendsCount(id: memberId, count: 1));
+        }
       }
 
       tasks[taskIndex] = updatedTask;
@@ -106,6 +130,37 @@ class ChallengService implements ChallengServiceInterface {
       }),
     );
     return challenges;
+  }
+
+  @override
+  Future<void> clearTasks(String challengeId) async {
+    DateTime today = DateTime.now();
+    DocumentSnapshot challengeDoc = await _firestore.collection('challenges').doc(challengeId).get();
+    Challenge challenge = Challenge.fromJson(
+      challengeDoc.data() as Map<String, dynamic>,
+    );
+    if (!isSameDay(today, challenge.today)) {
+      try {
+        List<Task> updatedTasks = challenge.tasks.map((task) {
+          task.friendsId.clear();
+          return task;
+        }).toList();
+
+        int newDayNumber = challenge.dayNumber + 1;
+        await FirebaseFirestore.instance.collection('challenges').doc(challengeId).update({
+          'tasks': updatedTasks.map((task) => task.toJson()).toList(),
+          'today': today.toIso8601String(), // Update today in challenge
+          'dayNumber': newDayNumber, // Increment dayNumber
+        });
+      } catch (e) {
+        log('Error clearing tasks in challenge: $e');
+        rethrow;
+      }
+    }
+  }
+
+  bool isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year && date1.month == date2.month && date1.day == date2.day;
   }
 }
 

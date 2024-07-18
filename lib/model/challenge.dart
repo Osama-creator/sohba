@@ -6,6 +6,7 @@ class Challenge {
   String name;
   DateTime endDate;
   DateTime today;
+  int dayNumber;
   List<Task> tasks;
   List<String> friendsId;
 
@@ -16,6 +17,7 @@ class Challenge {
     required this.endDate,
     required this.today,
     required this.tasks,
+    required this.dayNumber,
     required this.friendsId,
   });
 
@@ -24,6 +26,7 @@ class Challenge {
     return Challenge(
       name: json['name'],
       id: json['id'],
+      dayNumber: json['dayNumber'],
       adminId: json['adminId'],
       endDate: DateTime.parse(json['endDate']),
       today: DateTime.parse(json['today']),
@@ -37,6 +40,7 @@ class Challenge {
     return {
       'name': name,
       'id': id,
+      'dayNumber': dayNumber,
       'adminId': adminId,
       'endDate': endDate.toIso8601String(),
       'today': today.toIso8601String(),

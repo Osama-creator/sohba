@@ -32,6 +32,17 @@ class ChallengeNotifier extends ChangeNotifier {
     }
   }
 
+  Future<void> updateChallengeDay(
+    String challengeId,
+  ) async {
+    try {
+      await _challengService.clearTasks(challengeId);
+      notifyListeners();
+    } catch (e) {
+      log('Error adding member to challenge: $e');
+    }
+  }
+
   Future<void> addTaskToChallenge(String challengeId, Task newTask) async {
     try {
       await _challengService.addTaskToChallenge(challengeId, newTask);
@@ -41,9 +52,16 @@ class ChallengeNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> checkTask(String challengeId, String taskId, String memberId) async {
+  Future<void> checkTask(
+    String challengeId,
+    String taskId,
+  ) async {
     try {
-      await _challengService.checkTask(challengeId, taskId, memberId);
+      await _challengService.toggleTaskCheck(
+        challengeId,
+        taskId,
+      );
+
       notifyListeners();
     } catch (e) {
       log('Error checking task in challenge: $e');
