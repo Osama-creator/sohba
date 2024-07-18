@@ -8,23 +8,23 @@ class UserDataService {
   final SharedPreferences _prefs;
   UserDataService(this._prefs);
 
-  static const String userDataKey = 'userData';
+  static const String userDataKey = 'token';
 
-  static Future<void> saveUserDataToLocal(Map<String, dynamic> userData) async {
+  static Future<void> saveUserToken(String token) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(userDataKey, jsonEncode(userData));
+      await prefs.setString(userDataKey, token);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<Map<String, dynamic>?> getUserDataFromLocal() async {
+  Future<String?> getToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userDataString = prefs.getString(userDataKey);
       if (userDataString != null) {
-        return jsonDecode(userDataString);
+        return userDataString;
       }
       return null;
     } catch (e) {
@@ -36,18 +36,6 @@ class UserDataService {
     try {
       await _prefs.remove(userDataKey);
       await _prefs.remove('userToken');
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<UserModel?> getUserFromLocal() async {
-    try {
-      final userData = await getUserDataFromLocal();
-      if (userData != null) {
-        return UserModel.fromJson(userData);
-      }
-      return null;
     } catch (e) {
       rethrow;
     }

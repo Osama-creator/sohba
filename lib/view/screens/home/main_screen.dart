@@ -41,7 +41,7 @@ class _MainScreenState extends State<MainScreen> {
       body: PageView(
         controller: _pageController,
         children: const <Widget>[
-          ProfileTab(),
+          // ProfileTab(),
           ChalengesTab(),
           FriendsTab(),
         ],
@@ -57,14 +57,14 @@ class _MainScreenState extends State<MainScreen> {
         option: DotBarOptions(),
         onTap: _onItemTapped,
         items: [
-          BottomBarItem(
-            icon: const Icon(
-              Icons.account_circle_outlined,
-            ),
-            title: const Text("الحساب"),
-            unSelectedColor: Colors.grey.shade400,
-            selectedColor: AppColors.primary,
-          ),
+          // BottomBarItem(
+          //   icon: const Icon(
+          //     Icons.account_circle_outlined,
+          //   ),
+          //   title: const Text("الحساب"),
+          //   unSelectedColor: Colors.grey.shade400,
+          //   selectedColor: AppColors.primary,
+          // ),
           BottomBarItem(
             icon: const Icon(
               Icons.battery_5_bar,

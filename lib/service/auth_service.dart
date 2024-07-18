@@ -6,7 +6,7 @@ import 'package:sohba/service/local_service.dart';
 
 abstract class AuthServiceInterface {
   Future<void> signUp(UserModel user);
-  Future<UserCredential> signInWithEmailAndPassword(String phone, String password);
+  Future<void> signInWithEmailAndPassword(String phone, String password);
   Future<DocumentSnapshot> getUserData(String userToken);
 }
 
@@ -18,16 +18,23 @@ class AuthService implements AuthServiceInterface {
     UserCredential userCredential = await FirebaseAuth.instance
         .createUserWithEmailAndPassword(email: "${user.phone}@gmail.com", password: user.password!);
     await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set(user.toJson());
-    await UserDataService.saveUserDataToLocal(user.toJson());
+    String? token = await userCredential.user?.getIdToken();
+    if (token != null) {
+      UserDataService.saveUserToken(token);
+    }
   }
 
   @override
-  Future<UserCredential> signInWithEmailAndPassword(String phone, String password) async {
+  Future<void> signInWithEmailAndPassword(String phone, String password) async {
     try {
-      return await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: "$phone@gmail.com",
         password: password,
       );
+      String? token = await userCredential.user?.getIdToken();
+      if (token != null) {
+        UserDataService.saveUserToken(token);
+      }
     } catch (e) {
       rethrow;
     }

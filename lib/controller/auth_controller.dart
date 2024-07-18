@@ -66,6 +66,26 @@ class SignUpController extends StateNotifier<bool> {
     }
   }
 
+  Future<void> login(BuildContext context) async {
+    if (!_validateInputsLogin(context)) return;
+
+    try {
+      state = true; // isLoading
+
+      await authService.signInWithEmailAndPassword(phoneC.text.trim(), passwordC.text.trim());
+      state = false;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const MainScreen(),
+        ),
+      );
+    } catch (e) {
+      state = false; // isLoading
+      log(e.toString());
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ : ${e.toString()}')));
+    }
+  }
+
   bool _validateInputs(BuildContext context) {
     if (nameC.text.trim().isEmpty || phoneC.text.trim().isEmpty || passwordC.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى ملء جميع الحقول')));
@@ -80,12 +100,18 @@ class SignUpController extends StateNotifier<bool> {
     return true;
   }
 
+  bool _validateInputsLogin(BuildContext context) {
+    if (phoneC.text.trim().isEmpty || passwordC.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى ملء جميع الحقول')));
+      return false;
+    }
+    return true;
+  }
+
   void _handleFirebaseAuthException(FirebaseAuthException e, BuildContext context) {
     if (e.code == 'email-already-in-use') {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('هذا الحساب موجود بالفعل')));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('حدث خطأ : ${e.message}')));
-    }
+    } else {}
   }
 }
 

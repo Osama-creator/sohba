@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sohba/helpers/get_it.dart';
 import 'package:sohba/service/local_service.dart';
+import 'package:sohba/view/screens/auth/sign_in_page.dart';
 import 'package:sohba/view/screens/auth/sign_up_page.dart';
 import 'package:sohba/view/screens/home/main_screen.dart';
 
@@ -20,8 +21,8 @@ class _SplashPageState extends ConsumerState<SplashPage> {
   }
 
   Future<void> checkUserStatus() async {
-    final userData = await getIt.call<UserDataService>.call().getUserFromLocal();
-    if (userData != null) {
+    final token = await getIt.call<UserDataService>.call().getToken();
+    if (token != null) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const MainScreen(),
@@ -30,7 +31,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
     } else {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => const SignUpPage(),
+          builder: (context) => const SignInPage(),
         ),
       );
     }
