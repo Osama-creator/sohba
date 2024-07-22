@@ -10,9 +10,9 @@ class ChallengeNotifier extends ChangeNotifier {
 
   ChallengeNotifier(this._challengService);
 
-  Future<void> addChallenge(Challenge challenge) async {
+  Future<void> addChallenge(Challenge challenge, bool isPrivate) async {
     try {
-      await _challengService.addChallenge(challenge);
+      await _challengService.addChallenge(challenge, isPrivate);
       notifyListeners();
     } catch (e) {
       log('Error adding challenge: $e');
@@ -30,31 +30,28 @@ class ChallengeNotifier extends ChangeNotifier {
 
   Future<void> updateChallengeDay(
     String challengeId,
+    String collectionKey,
   ) async {
     try {
-      await _challengService.clearTasks(challengeId);
+      await _challengService.clearTasks(challengeId, collectionKey);
       notifyListeners();
     } catch (e) {
       log('Error adding member to challenge: $e');
     }
   }
 
-  Future<void> addTaskToChallenge(String challengeId, Task newTask) async {
+  Future<void> addTaskToChallenge(String challengeId, Task newTask, String collectionKey) async {
     try {
-      await _challengService.addTaskToChallenge(challengeId, newTask);
+      await _challengService.addTaskToChallenge(challengeId, newTask, collectionKey);
       notifyListeners();
     } catch (e) {
       log('Error adding task to challenge: $e');
     }
   }
 
-  Future<void> removeChallengeFromAll(
-    String challengeId,
-  ) async {
+  Future<void> removeChallengeFromAll(String challengeId, String collectionKey) async {
     try {
-      await _challengService.removeChallenge(
-        challengeId,
-      );
+      await _challengService.removeChallenge(challengeId, collectionKey);
       notifyListeners();
     } catch (e) {
       log('Error In Removiing challenge: $e');
@@ -74,15 +71,9 @@ class ChallengeNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> checkTask(
-    String challengeId,
-    String taskId,
-  ) async {
+  Future<void> checkTask(String challengeId, String taskId, String collectionKey) async {
     try {
-      await _challengService.toggleTaskCheck(
-        challengeId,
-        taskId,
-      );
+      await _challengService.toggleTaskCheck(challengeId, taskId, collectionKey);
 
       notifyListeners();
     } catch (e) {
@@ -90,27 +81,21 @@ class ChallengeNotifier extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteTask(
-    String challengeId,
-    String taskId,
-  ) async {
+  Future<void> deleteTask(String challengeId, String taskId, String collectionKey) async {
     try {
-      await _challengService.deleteTask(
-        challengeId,
-        taskId,
-      );
+      await _challengService.deleteTask(challengeId, taskId, collectionKey);
       notifyListeners();
     } catch (e) {
       log('Error Date task in challenge: $e');
     }
   }
 
-  Future<void> updateEndDate(String challengeId, DateTime endDate) async {
+  Future<void> updateTask(String challengeId, Task task, String collectionKey) async {
     try {
-      await _challengService.updateEndDate(challengeId, endDate);
+      await _challengService.updateTask(challengeId, task, collectionKey);
       notifyListeners();
     } catch (e) {
-      log('Error updating end date of challenge: $e');
+      log('Error updating task: $e');
     }
   }
 }

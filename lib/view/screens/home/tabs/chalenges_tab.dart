@@ -59,7 +59,9 @@ class ChalengesTab extends ConsumerWidget {
         onPressed: () async {
           final result = await Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => const AddChallengeScreen(),
+              builder: (context) => const AddChallengeScreen(
+                isPrivate: true,
+              ),
             ),
           );
           if (result == true) {
@@ -88,10 +90,11 @@ class ChalengesTab extends ConsumerWidget {
 
 class ChallengeCard extends StatefulWidget {
   final Challenge challenge;
-
+  final bool isPrivate;
   const ChallengeCard({
     super.key,
     required this.challenge,
+    this.isPrivate = true,
   });
 
   @override
@@ -132,14 +135,18 @@ class _ChallengeCardState extends State<ChallengeCard> {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => ChallengeDetails(challenge: widget.challenge),
+              builder: (context) => ChallengeDetails(
+                challenge: widget.challenge,
+                collectionKey: widget.isPrivate ? 'challenges' : 'main_challenges',
+              ),
             ),
           );
         },
         child: Card(
           elevation: 0,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20), side: const BorderSide(color: AppColors.primary)),
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(color: widget.isPrivate ? AppColors.primary : const Color.fromARGB(255, 103, 189, 107))),
           color: AppColors.white,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -161,7 +168,9 @@ class _ChallengeCardState extends State<ChallengeCard> {
                       const SizedBox(height: 5),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: AppColors.primary),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            color: widget.isPrivate ? AppColors.primary : const Color.fromARGB(255, 103, 189, 107)),
                         child: Text(
                           'المهام: ${widget.challenge.tasks.length}',
                           style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -175,7 +184,7 @@ class _ChallengeCardState extends State<ChallengeCard> {
                         children: [
                           Icon(
                             Icons.calendar_month,
-                            color: AppColors.primary,
+                            color: widget.isPrivate ? AppColors.primary : const Color.fromARGB(255, 103, 189, 107),
                             size: 15.sp,
                           ),
                           SizedBox(width: 5.w),
@@ -191,40 +200,42 @@ class _ChallengeCardState extends State<ChallengeCard> {
                     ],
                   ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(left: 10.w, top: 50.h),
-                  width: 80.w,
-                  child: Stack(
-                    children: [
-                      ...usersImages.take(2).map((image) {
-                        int index = usersImages.indexOf(image);
-                        return Positioned(
-                          left: index * 20.0,
-                          child: CircleAvatar(
-                            backgroundImage: NetworkImage(image),
-                            radius: 15,
-                            backgroundColor: AppColors.grey,
-                          ),
-                        );
-                      }),
-                      if (usersImages.length > 2)
-                        Positioned(
-                          left: 40.0,
-                          child: CircleAvatar(
-                            backgroundColor: AppColors.white,
-                            radius: 15,
-                            child: Text(
-                              '+${usersImages.length - 2}',
-                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                    color: AppColors.black,
-                                    fontWeight: FontWeight.bold,
+                !widget.isPrivate
+                    ? Container()
+                    : Container(
+                        padding: EdgeInsets.only(left: 10.w, top: 50.h),
+                        width: 80.w,
+                        child: Stack(
+                          children: [
+                            ...usersImages.take(2).map((image) {
+                              int index = usersImages.indexOf(image);
+                              return Positioned(
+                                left: index * 20.0,
+                                child: CircleAvatar(
+                                  backgroundImage: NetworkImage(image),
+                                  radius: 15,
+                                  backgroundColor: AppColors.grey,
+                                ),
+                              );
+                            }),
+                            if (usersImages.length > 2)
+                              Positioned(
+                                left: 40.0,
+                                child: CircleAvatar(
+                                  backgroundColor: AppColors.white,
+                                  radius: 15,
+                                  child: Text(
+                                    '+${usersImages.length - 2}',
+                                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                          color: AppColors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                   ),
-                            ),
-                          ),
+                                ),
+                              ),
+                          ],
                         ),
-                    ],
-                  ),
-                ),
+                      ),
               ],
             ),
           ),

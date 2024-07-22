@@ -5,21 +5,21 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sohba/model/challenge.dart';
 import 'package:sohba/model/task.dart';
+import 'package:whatsapp_sender_flutter/whatsapp_sender_flutter.dart';
 
 abstract class ChallengServiceInterface {
-  Future<void> addChallenge(Challenge challenge);
+  Future<void> addChallenge(Challenge challenge, bool isPrivate);
   Stream<List<Challenge>> streamChallenges();
   Future<void> addMemberToChallenge(String challengeId, String memberId);
-  Future<void> addTaskToChallenge(String challengeId, Task newTask);
-  Future<void> clearTasks(String challengeId);
-  Future<void> toggleTaskCheck(
-    String challengeId,
-    String taskId,
-  );
-  Future<void> updateEndDate(String challengeId, DateTime endDate);
-  Future<void> removeChallenge(String challengeId);
+  Future<void> addTaskToChallenge(String challengeId, Task newTask, String collectionKey);
+  Future<void> clearTasks(String challengeId, String collectionKey);
+  Future<void> toggleTaskCheck(String challengeId, String taskId, String collectionKey);
+  Stream<List<Challenge>> mainChallenges();
+  Future<void> updateEndDate(String challengeId, DateTime endDate, String collectionKey);
+  Future<void> removeChallenge(String challengeId, String collectionKey);
   Future<void> leaveChallenge(String challengeId);
-  Future<void> deleteTask(String challengeId, String taskId);
+  Future<void> deleteTask(String challengeId, String taskId, String collectionKey);
+  Future<void> updateTask(String challengeId, Task updatedTask, String collectionKey);
 }
 
 class ChallengService implements ChallengServiceInterface {
@@ -27,23 +27,26 @@ class ChallengService implements ChallengServiceInterface {
   final String _collectionName = 'challenges';
 
   @override
-  Future<void> addChallenge(Challenge challenge) async {
-    DocumentReference docRef = _firestore.collection(_collectionName).doc();
+  Future<void> addChallenge(Challenge challenge, bool isPrivate) async {
+    DocumentReference docRef =
+        isPrivate ? _firestore.collection(_collectionName).doc() : _firestore.collection('main_challenges').doc();
 
     // Update the challenge object with the document ID
     challenge.id = docRef.id;
 
     // Set the challenge details in Firestore
     await docRef.set(challenge.toJson());
-    for (var userId in challenge.friendsId) {
-      await addMemberToChallenge(challenge.id, userId);
+    if (isPrivate) {
+      for (var userId in challenge.friendsId) {
+        await addMemberToChallenge(challenge.id, userId);
+      }
     }
   }
 
   @override
-  Future<void> removeChallenge(String challengeId) async {
+  Future<void> removeChallenge(String challengeId, String collectionKey) async {
     // Get the challenge document
-    DocumentSnapshot challengeDoc = await _firestore.collection(_collectionName).doc(challengeId).get();
+    DocumentSnapshot challengeDoc = await _firestore.collection(collectionKey).doc(challengeId).get();
 
     if (!challengeDoc.exists) {
       throw Exception('Challenge with ID $challengeId does not exist.');
@@ -53,14 +56,14 @@ class ChallengService implements ChallengServiceInterface {
     List<String> friendsId = List<String>.from(challengeDoc.get('friendsId'));
 
     // Remove the challenge document
-    await _firestore.collection(_collectionName).doc(challengeId).delete();
+    await _firestore.collection(collectionKey).doc(challengeId).delete();
 
     // Remove the challenge ID from each user's challenges collection
     WriteBatch batch = _firestore.batch();
 
     for (String userId in friendsId) {
       DocumentReference userChallengeDoc =
-          _firestore.collection('users').doc(userId).collection('challenges').doc(challengeId);
+          _firestore.collection('users').doc(userId).collection(collectionKey).doc(challengeId);
       batch.delete(userChallengeDoc);
     }
 
@@ -69,7 +72,9 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> leaveChallenge(String challengeId) async {
+  Future<void> leaveChallenge(
+    String challengeId,
+  ) async {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     await _firestore.collection(_collectionName).doc(challengeId).update({
       'friendsId': FieldValue.arrayRemove([userId]),
@@ -78,7 +83,10 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> addMemberToChallenge(String challengeId, String memberId) async {
+  Future<void> addMemberToChallenge(
+    String challengeId,
+    String memberId,
+  ) async {
     await _firestore.collection(_collectionName).doc(challengeId).update({
       'friendsId': FieldValue.arrayUnion([memberId]),
     });
@@ -86,20 +94,17 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> addTaskToChallenge(String challengeId, Task newTask) async {
-    await _firestore.collection(_collectionName).doc(challengeId).update({
+  Future<void> addTaskToChallenge(String challengeId, Task newTask, String collectionKey) async {
+    await _firestore.collection(collectionKey).doc(challengeId).update({
       'tasks': FieldValue.arrayUnion([newTask.toJson()]),
     });
   }
 
   @override
-  Future<void> toggleTaskCheck(
-    String challengeId,
-    String taskId,
-  ) async {
+  Future<void> toggleTaskCheck(String challengeId, String taskId, String collectionKey) async {
     String memberId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
-    DocumentSnapshot challengeSnapshot = await _firestore.collection(_collectionName).doc(challengeId).get();
+    DocumentSnapshot challengeSnapshot = await _firestore.collection(collectionKey).doc(challengeId).get();
     if (!challengeSnapshot.exists) {
       throw Exception('Challenge with ID $challengeId does not exist.');
     }
@@ -136,7 +141,7 @@ class ChallengService implements ChallengServiceInterface {
       }
 
       tasks[taskIndex] = updatedTask;
-      await _firestore.collection(_collectionName).doc(challengeId).update({
+      await _firestore.collection(collectionKey).doc(challengeId).update({
         'tasks': tasks.map((task) => task.toJson()).toList(),
       });
     } else {
@@ -145,8 +150,8 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> updateEndDate(String challengeId, DateTime endDate) async {
-    await _firestore.collection(_collectionName).doc(challengeId).update({
+  Future<void> updateEndDate(String challengeId, DateTime endDate, String collectionKey) async {
+    await _firestore.collection(collectionKey).doc(challengeId).update({
       'endDate': endDate.toIso8601String(),
     });
   }
@@ -175,9 +180,26 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> clearTasks(String challengeId) async {
+  Stream<List<Challenge>> mainChallenges() {
+    return _firestore.collection('main_challenges').snapshots().asyncMap((snapshot) async {
+      List<String> challengesIds = snapshot.docs.map((doc) => doc.id).toList();
+      List<Challenge> challenges = await Future.wait(
+        challengesIds.map((challengeId) async {
+          DocumentSnapshot challengeDoc = await _firestore.collection('main_challenges').doc(challengeId).get();
+          Challenge challenge = Challenge.fromJson(
+            challengeDoc.data() as Map<String, dynamic>,
+          );
+          return challenge;
+        }),
+      );
+      return challenges;
+    });
+  }
+
+  @override
+  Future<void> clearTasks(String challengeId, String collectionKey) async {
     DateTime today = DateTime.now();
-    DocumentSnapshot challengeDoc = await _firestore.collection('challenges').doc(challengeId).get();
+    DocumentSnapshot challengeDoc = await _firestore.collection(collectionKey).doc(challengeId).get();
     Challenge challenge = Challenge.fromJson(
       challengeDoc.data() as Map<String, dynamic>,
     );
@@ -188,7 +210,7 @@ class ChallengService implements ChallengServiceInterface {
           return task;
         }).toList();
         int newDayNumber = challenge.dayNumber + 1;
-        await FirebaseFirestore.instance.collection('challenges').doc(challengeId).update({
+        await FirebaseFirestore.instance.collection(collectionKey).doc(challengeId).update({
           'tasks': updatedTasks.map((task) => task.toJson()).toList(),
           'today': today.toIso8601String(), // Update today in challenge
           'dayNumber': newDayNumber, // Increment dayNumber
@@ -205,10 +227,55 @@ class ChallengService implements ChallengServiceInterface {
   }
 
   @override
-  Future<void> deleteTask(String challengeId, String taskId) {
-    return _firestore.collection(_collectionName).doc(challengeId).update({
-      'tasks': FieldValue.arrayRemove([taskId]),
-    });
+  Future<void> deleteTask(String challengeId, String taskId, String collectionKey) async {
+    DocumentSnapshot challengeDoc = await _firestore.collection(collectionKey).doc(challengeId).get();
+
+    if (challengeDoc.exists) {
+      List<dynamic> tasks = challengeDoc['tasks'];
+
+      // Find the task to be removed
+      var taskToRemove = tasks.firstWhere((task) => task['id'] == taskId, orElse: () => null);
+
+      if (taskToRemove != null) {
+        await _firestore.collection(collectionKey).doc(challengeId).update({
+          'tasks': FieldValue.arrayRemove([taskToRemove]),
+        });
+        log('Task removed successfully');
+      } else {
+        log('Task not found');
+      }
+    } else {
+      log('Challenge document not found');
+    }
+  }
+
+  @override
+  Future<void> updateTask(String challengeId, Task updatedTask, String collectionKey) async {
+    // Fetch the challenge document
+    DocumentSnapshot challengeDoc = await _firestore.collection(collectionKey).doc(challengeId).get();
+
+    if (challengeDoc.exists) {
+      List<dynamic> tasks = List.from(challengeDoc['tasks']);
+
+      // Find the index of the task to be updated
+      int taskIndex = tasks.indexWhere((task) => task['id'] == updatedTask.id);
+
+      if (taskIndex != -1) {
+        // Update the task at the found index
+        tasks[taskIndex] = updatedTask.toJson();
+
+        // Update the tasks array in Firestore
+        await _firestore.collection(collectionKey).doc(challengeId).update({
+          'tasks': tasks,
+        });
+
+        log('Task updated successfully');
+      } else {
+        log('Task not found');
+      }
+    } else {
+      log('Challenge document not found');
+    }
   }
 }
 
@@ -218,4 +285,8 @@ final chalengeServiceProvider = Provider<ChallengService>(
 final challengesStreamProvider = StreamProvider<List<Challenge>>((ref) {
   final challengeService = ref.watch(chalengeServiceProvider);
   return challengeService.streamChallenges();
+});
+final mainchallengesStreamProvider = StreamProvider<List<Challenge>>((ref) {
+  final challengeService = ref.watch(chalengeServiceProvider);
+  return challengeService.mainChallenges();
 });

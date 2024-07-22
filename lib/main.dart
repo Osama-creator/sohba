@@ -7,6 +7,8 @@ import 'package:sohba/helpers/get_it.dart';
 import 'package:sohba/model/friend_model.dart';
 import 'package:sohba/view/screens/splash/splash_screen.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sohba/generated/l10n.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +22,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  // final sStorage = const FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +30,22 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (_, child) {
-        return MaterialApp(
-          title: "صحبة",
-          locale: const Locale('ar'),
-          theme: getThemDataLight(),
-          debugShowCheckedModeBanner: false,
-          home: const SplashPage(),
+        return Directionality(
+          textDirection: TextDirection.rtl, // Enforce RTL
+          child: MaterialApp(
+            title: "تحدي",
+            locale: const Locale('ar'),
+            localizationsDelegates: const [
+              S.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
+            theme: getThemDataLight(),
+            debugShowCheckedModeBanner: false,
+            home: const SplashPage(),
+          ),
         );
       },
     );

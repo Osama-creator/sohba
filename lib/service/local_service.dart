@@ -32,10 +32,10 @@ class UserDataService {
     }
   }
 
-  Future<void> clearUserDataLocal() async {
+  static Future<void> clearUserDataLocal() async {
     try {
-      await _prefs.remove(userDataKey);
-      await _prefs.remove('userToken');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(userDataKey);
     } catch (e) {
       rethrow;
     }

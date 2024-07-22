@@ -2,12 +2,20 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sohba/model/friend_model.dart';
 import 'package:sohba/model/user_model.dart';
 import 'package:sohba/service/auth_service.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'dart:developer';
 
 import 'package:sohba/view/screens/home/main_screen.dart';
+
+final userProvider = FutureProvider<FriendModel>(
+  (
+    ref,
+  ) =>
+      ref.read(authServiceProvider).getUserData(),
+);
 
 class SignUpController extends StateNotifier<bool> {
   final AuthServiceInterface authService;
@@ -112,6 +120,18 @@ class SignUpController extends StateNotifier<bool> {
     if (e.code == 'email-already-in-use') {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('هذا الحساب موجود بالفعل')));
     } else {}
+  }
+
+  void forgetPass(BuildContext context) async {
+    try {
+      if (phoneC.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('يرجى كتابة رقم الهاتف')));
+      } else {
+        await authService.getPassword(phoneC.text.trim());
+      }
+    } catch (e) {
+      log(e.toString());
+    }
   }
 }
 

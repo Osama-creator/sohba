@@ -1,5 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,8 +16,9 @@ import 'package:sohba/model/task.dart';
 import 'package:sohba/view/screens/challenge/add_friends_to_challenge.dart';
 
 class ChallengeDetails extends ConsumerStatefulWidget {
-  const ChallengeDetails({super.key, required this.challenge});
+  const ChallengeDetails({super.key, required this.challenge, required this.collectionKey});
   final Challenge challenge;
+  final String collectionKey;
 
   @override
   _ChallengeDetailsState createState() => _ChallengeDetailsState();
@@ -29,13 +32,13 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
   @override
   void initState() {
     super.initState();
-    _challengeStream = FirebaseFirestore.instance.collection('challenges').doc(widget.challenge.id).snapshots();
+    _challengeStream = FirebaseFirestore.instance.collection(widget.collectionKey).doc(widget.challenge.id).snapshots();
     // Call updateChallengeDay when the screen is first opened
     updateChallengeDay(widget.challenge.id);
   }
 
   Future<void> updateChallengeDay(String challengeId) async {
-    await ref.read(challengeNotifierProvider.notifier).updateChallengeDay(challengeId);
+    await ref.read(challengeNotifierProvider.notifier).updateChallengeDay(challengeId, widget.collectionKey);
   }
 
   void _showCompletedUsersBottomSheet(BuildContext context, List<String> completedUserIds) async {
@@ -44,7 +47,7 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
         .where(FieldPath.documentId, whereIn: completedUserIds)
         .get();
 
-    final userNames = userDocs.docs.map((doc) => doc.data()['name']).toList();
+    final users = userDocs.docs.map((doc) => FriendModel.fromJson(doc.data(), doc.id)).toList();
 
     showModalBottomSheet(
       context: context,
@@ -53,10 +56,19 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
           height: 300.h,
           padding: const EdgeInsets.all(16.0),
           child: ListView.builder(
-            itemCount: userNames.length,
+            itemCount: users.length,
             itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(userNames[index]),
+              return Column(
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: users[index].avatar != null ? NetworkImage(users[index].avatar) : null,
+                      child: users[index].avatar == null ? const Icon(Icons.person) : null,
+                    ),
+                    title: Text(users[index].name),
+                  ),
+                  const Divider()
+                ],
               );
             },
           ),
@@ -65,35 +77,45 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
     );
   }
 
-  void _showAddTaskDialog(BuildContext context) {
+  void _showAddAndUpdateTaskDialog(BuildContext context, bool isUpdated, Task? task) {
     final taskNameController = TextEditingController();
-
+    if (isUpdated) {
+      taskNameController.text = task!.name;
+    }
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Add New Task'),
+          title: Text(isUpdated ? 'تعديل المهمة' : 'إضافة مهمة جديدة'),
           content: TextField(
             controller: taskNameController,
-            decoration: const InputDecoration(hintText: "Task Name"),
+            decoration: const InputDecoration(hintText: "إسم المهمة"),
           ),
           actions: [
             TextButton(
-              child: const Text('Cancel'),
+              child: const Text('إلغاء'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: const Text('Add'),
+              child: const Text('تم'),
               onPressed: () async {
-                var task = Task(
-                  id: DateTime.now().toIso8601String(),
+                var newTask = Task(
+                  id: isUpdated ? task!.id : DateTime.now().toIso8601String(),
                   name: taskNameController.text,
-                  friendsId: [],
-                  friendsCountList: [],
+                  friendsId: isUpdated ? task!.friendsId : [],
+                  friendsCountList: isUpdated ? task!.friendsCountList : [],
                 );
-                await ref.read(challengeNotifierProvider.notifier).addTaskToChallenge(widget.challenge.id, task);
+                if (isUpdated) {
+                  await ref
+                      .read(challengeNotifierProvider.notifier)
+                      .updateTask(widget.challenge.id, newTask, widget.collectionKey);
+                } else {
+                  await ref
+                      .read(challengeNotifierProvider.notifier)
+                      .addTaskToChallenge(widget.challenge.id, newTask, widget.collectionKey);
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -123,7 +145,9 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
             TextButton(
               child: const Text('حذف'),
               onPressed: () async {
-                await ref.read(challengeNotifierProvider.notifier).deleteTask(widget.challenge.id, task.id);
+                await ref
+                    .read(challengeNotifierProvider.notifier)
+                    .deleteTask(widget.challenge.id, task.id, widget.collectionKey);
                 Navigator.of(context).pop();
               },
             ),
@@ -153,13 +177,21 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
     if (option == 'إضافة صديق') {
       addFriends(context);
     } else if (option == 'إضافة مهمة') {
-      _showAddTaskDialog(context);
+      _showAddAndUpdateTaskDialog(context, false, null);
     } else if (option == 'حذف التحدي') {
-      ref.read(challengeNotifierProvider.notifier).removeChallengeFromAll(widget.challenge.id);
+      ref.read(challengeNotifierProvider.notifier).removeChallengeFromAll(widget.challenge.id, widget.collectionKey);
       Navigator.of(context).pop();
     } else if (option == 'الخروج من التحدي') {
       ref.read(challengeNotifierProvider.notifier).leaveChallenge(widget.challenge.id);
       Navigator.of(context).pop();
+    }
+  }
+
+  void _handleMenuOptionForTasks(String option, Task task) {
+    if (option == 'حذف') {
+      _deleteTaskConfirmation(context, task);
+    } else {
+      _showAddAndUpdateTaskDialog(context, true, task);
     }
   }
 
@@ -191,18 +223,23 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
               final user = users[index]['user'];
               final taskCount = users[index]['taskCount'];
 
-              return ListTile(
-                leading: CircleAvatar(
-                  backgroundImage: NetworkImage(user.avatar ?? ''),
-                ),
-                title: Text(
-                  user.name,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.black),
-                ),
-                trailing: Text(
-                  'النقاط : ${taskCount.toString()}',
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.primary),
-                ),
+              return Column(
+                children: [
+                  ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(user.avatar ?? ''),
+                    ),
+                    title: Text(
+                      user.name,
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.black),
+                    ),
+                    trailing: Text(
+                      'النقاط : ${taskCount.toString()}',
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.primary),
+                    ),
+                  ),
+                  const Divider()
+                ],
               );
             },
           ),
@@ -265,7 +302,7 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
                           if (isAdmin) 'إضافة صديق',
                           if (isAdmin) 'إضافة مهمة',
                           if (isAdmin) 'حذف التحدي',
-                          if (!isAdmin) 'الخروج من التحدي'
+                          if (!isAdmin || widget.collectionKey != 'main_challenges') 'الخروج من التحدي'
                         ].map((String choice) {
                           return PopupMenuItem<String>(
                             value: choice,
@@ -313,7 +350,7 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
                               if (value != null) {
                                 await ref
                                     .read(challengeNotifierProvider.notifier)
-                                    .checkTask(currentChallenge.id, task.id);
+                                    .checkTask(currentChallenge.id, task.id, widget.collectionKey);
                               }
                             },
                           ),
@@ -332,12 +369,30 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
                                 icon: const Icon(Icons.leaderboard_rounded, color: AppColors.black),
                               ),
                               if (isAdmin)
-                                IconButton(
-                                  onPressed: () async {
-                                    _deleteTaskConfirmation(context, task);
+                                PopupMenuButton<String>(
+                                  onSelected: (value) {
+                                    _handleMenuOptionForTasks(value, task);
                                   },
-                                  icon: const Icon(Icons.delete, color: AppColors.red),
-                                )
+                                  iconSize: 25.sp,
+                                  iconColor: AppColors.black,
+                                  itemBuilder: (BuildContext context) {
+                                    return <String>[
+                                      'تعديل',
+                                      'حذف',
+                                    ].map((String choice) {
+                                      return PopupMenuItem<String>(
+                                        value: choice,
+                                        child: Text(choice),
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+                              // IconButton(
+                              //   onPressed: () async {
+                              //     _deleteTaskConfirmation(context, task);
+                              //   },
+                              //   icon: const Icon(Icons.delete, color: AppColors.red),
+                              // )
                             ],
                           ),
                           subtitle: GestureDetector(

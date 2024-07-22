@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:sohba/config/utils/colors.dart';
 import 'package:sohba/view/screens/home/tabs/chalenges_tab.dart';
-import 'package:sohba/view/screens/home/tabs/friends_tab.dart';
+import 'package:sohba/view/screens/friends/friends_tab.dart';
+import 'package:sohba/view/screens/home/tabs/main_challenges.dart';
 import 'package:sohba/view/screens/home/tabs/profile_tap.dart';
 import 'package:stylish_bottom_bar/stylish_bottom_bar.dart';
 
@@ -41,9 +42,9 @@ class _MainScreenState extends State<MainScreen> {
       body: PageView(
         controller: _pageController,
         children: const <Widget>[
-          // ProfileTab(),
           ChalengesTab(),
-          FriendsTab(),
+          MainChalengesTab(),
+          SettingTab(),
         ],
         onPageChanged: (index) {
           setState(() {
@@ -57,27 +58,27 @@ class _MainScreenState extends State<MainScreen> {
         option: DotBarOptions(),
         onTap: _onItemTapped,
         items: [
-          // BottomBarItem(
-          //   icon: const Icon(
-          //     Icons.account_circle_outlined,
-          //   ),
-          //   title: const Text("الحساب"),
-          //   unSelectedColor: Colors.grey.shade400,
-          //   selectedColor: AppColors.primary,
-          // ),
           BottomBarItem(
             icon: const Icon(
-              Icons.battery_5_bar,
+              Icons.flag_rounded,
             ),
-            title: const Text("التحديات"),
+            title: const Text("تحدياتي"),
             unSelectedColor: Colors.grey.shade400,
             selectedColor: AppColors.primary,
           ),
           BottomBarItem(
             icon: const Icon(
-              Icons.people_alt_outlined,
+              Icons.leaderboard_rounded,
             ),
-            title: const Text("الأصدقاء"),
+            title: const Text("التحديات الكبرى"),
+            unSelectedColor: Colors.grey.shade400,
+            selectedColor: AppColors.primary,
+          ),
+          BottomBarItem(
+            icon: const Icon(
+              Icons.settings,
+            ),
+            title: const Text("الإعدادات"),
             unSelectedColor: Colors.grey.shade400,
             selectedColor: AppColors.primary,
           ),

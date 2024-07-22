@@ -16,18 +16,21 @@ dependencies:
   firebase_core: ^2.31.0
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_riverpod: ^2.5.1
   flutter_screenutil: ^5.9.0
   gap: ^3.0.1
   get_it: ^7.7.0
   google_fonts: null
   hive_flutter: ^1.1.0
-  http: ^1.2.1
+  http: ^0.13.0
   image_picker: ^1.0.8
   laravel_exception: ^0.0.4
   local_auth: ^2.1.8
   shared_preferences: ^2.2.3
   stylish_bottom_bar: ^1.1.0
+  whatsapp_sender_flutter: ^0.2.0
 
 dev_dependencies:
   build_runner: ^2.1.4
@@ -40,3 +43,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+flutter_intl:
+  enabled: true

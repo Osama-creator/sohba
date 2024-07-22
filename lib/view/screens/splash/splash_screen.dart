@@ -43,7 +43,7 @@ class _SplashPageState extends ConsumerState<SplashPage> {
       body: Center(
         child: Image.asset(
           "assets/images/logo.png",
-          scale: 1,
+          scale: 2.5,
         ),
       ),
     );

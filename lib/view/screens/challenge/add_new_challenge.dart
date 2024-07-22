@@ -8,7 +8,8 @@ import 'package:sohba/model/task.dart';
 import 'package:sohba/view/screens/challenge/add_friends_to_challenge.dart';
 
 class AddChallengeScreen extends ConsumerStatefulWidget {
-  const AddChallengeScreen({super.key});
+  final bool isPrivate;
+  const AddChallengeScreen({super.key, required this.isPrivate});
 
   @override
   _AddChallengeScreenState createState() => _AddChallengeScreenState();
@@ -37,7 +38,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
         friendsId: _selectedFriends,
       );
 
-      ref.read(challengeNotifierProvider).addChallenge(newChallenge);
+      ref.read(challengeNotifierProvider).addChallenge(newChallenge, widget.isPrivate);
       Navigator.of(context).pop(true);
     }
   }

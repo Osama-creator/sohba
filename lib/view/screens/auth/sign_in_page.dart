@@ -25,7 +25,12 @@ class SignInPage extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ),
-        Gap(200.h),
+        Gap(20.h),
+        Image.asset(
+          "assets/images/logo.png",
+          scale: 2,
+        ),
+        Gap(20.h),
         SizedBox(
           height: 50.h,
           child: MyTextField(
@@ -46,7 +51,7 @@ class SignInPage extends ConsumerWidget {
             obscureText: true,
           ),
         ),
-        Gap(50.h),
+        Gap(20.h),
         Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w),
             width: double.infinity,
@@ -62,6 +67,14 @@ class SignInPage extends ConsumerWidget {
                       )
                     : const Text('تسجيل الدخول'))),
         Gap(50.h),
+        // InkWell(
+        //     onTap: () {
+        //       signUpController.forgetPass(context);
+        //     },
+        //     child: Text(
+        //       'نسيت كلمة المرور؟',
+        //       style: Theme.of(context).textTheme.bodySmall!.copyWith(color: AppColors.black),
+        //     )),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
