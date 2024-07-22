@@ -357,7 +357,7 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
                           title: Text(
                             task.name,
                             style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                  color: AppColors.black,
+                                  color: AppColors.primary,
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
@@ -398,11 +398,9 @@ class _ChallengeDetailsState extends ConsumerState<ChallengeDetails> {
                           subtitle: GestureDetector(
                             onTap: () => _showCompletedUsersBottomSheet(context, task.friendsId),
                             child: Text(
-                              'أنهى المهمه   :  $friendsCompleted ',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .displaySmall!
-                                  .copyWith(color: Colors.grey, fontSize: 12.sp),
+                              'أنهى المهمه  :  $friendsCompleted ',
+                              style: Theme.of(context).textTheme.displaySmall!.copyWith(
+                                  color: friendsCompleted == 0 ? Colors.grey : AppColors.black, fontSize: 12.sp),
                             ),
                           ),
                         ),
