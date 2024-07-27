@@ -54,7 +54,8 @@ class SignUpController extends StateNotifier<bool> {
         name: nameC.text.trim(),
         phone: phoneC.text.trim(),
         password: passwordC.text.trim(),
-        avatar: prfImage,
+        avatar: prfImage ??
+            'https://th.bing.com/th/id/R.6e78774c2c47f39ff8d382296ba995b6?rik=ZstKOqQ1vskzBw&pid=ImgRaw&r=0',
       );
 
       await authService.signUp(user);

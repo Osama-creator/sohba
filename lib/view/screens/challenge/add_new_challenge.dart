@@ -77,7 +77,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Challenge'),
+        title: const Text('إضافة تحدي جديد'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -87,12 +87,12 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
             children: [
               TextFormField(
                 decoration: const InputDecoration(
-                  labelText: 'Challenge Name',
+                  labelText: 'إسم التحدي',
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value!.isEmpty) {
-                    return 'Please enter a challenge name';
+                    return 'الرجاء ادخال اسم التحدي';
                   }
                   return null;
                 },
@@ -102,7 +102,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
               ),
               const SizedBox(height: 16),
               ListTile(
-                title: Text('End Date: ${DateFormat.yMd().format(_endDate)}'),
+                title: Text('تاريخ الانتهاء: ${DateFormat.yMd().format(_endDate)}'),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: () => _selectEndDate(context),
               ),
@@ -111,7 +111,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
                 onPressed: () {
                   _showAddTaskDialog(context);
                 },
-                child: const Text('Add Task'),
+                child: const Text('إضافة مهمة'),
               ),
               const SizedBox(height: 16),
               ..._tasks.map((task) => ListTile(
@@ -129,7 +129,7 @@ class _AddChallengeScreenState extends ConsumerState<AddChallengeScreen> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _submitForm,
-                child: const Text("Submit"),
+                child: const Text("حفظ"),
               ),
             ],
           ),
